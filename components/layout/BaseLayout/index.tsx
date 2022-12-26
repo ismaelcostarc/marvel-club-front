@@ -11,6 +11,7 @@ import UserCard from "../UserCard";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Head from "next/head";
 
 type BaseLayoutProps = {
   children: React.ReactNode;
@@ -50,7 +51,11 @@ const items: MenuItem[] = [
 
 const routes = ["/lists", "/bookmarks", "/profile"];
 
-export default function BaseLayout({ children, name, pathname }: BaseLayoutProps) {
+export default function BaseLayout({
+  children,
+  name,
+  pathname,
+}: BaseLayoutProps) {
   const router = useRouter();
   const [actualKey, setActualKey] = useState("");
 
@@ -65,8 +70,13 @@ export default function BaseLayout({ children, name, pathname }: BaseLayoutProps
     router.push(route);
   };
 
+  const title = pathname[1].toUpperCase() + pathname.substring(2)
+
   return (
     <div className={style.container}>
+      <Head>
+        <title>{title}</title>
+      </Head>
       <Layout>
         <Sider>
           <Image
