@@ -1,6 +1,7 @@
 import nookies, { destroyCookie } from "nookies";
 import BaseLayout from "../../../components/layout/BaseLayout";
 import axios from "axios";
+import BaseHeader from "../../../components/ui/BaseHeader";
 
 type GetUserResponse = {
   name: string;
@@ -60,7 +61,7 @@ const BookmarkedCharactePage = ({
       baseURL={baseURL}
       tokenName={tokenName}
     >
-      <div>bookmarked characters</div>
+      <BaseHeader>Bookmarked Characters</BaseHeader>
     </BaseLayout>
   );
 };

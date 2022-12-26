@@ -26,7 +26,7 @@ export async function getServerSideProps(context: any) {
       return {
         redirect: {
           permanent: false,
-          destination: "/lists/comics",
+          destination: "/search/comics",
         },
         props: {},
       };
@@ -58,7 +58,7 @@ const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
         path: "*",
       });
 
-      router.push("/lists/comics");
+      router.push("/search/comics");
     } catch (err: any) {
       api.error({
         message: err.message,
@@ -81,7 +81,7 @@ const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
         path: "*",
       });
 
-      router.push("/lists/comics");
+      router.push("/search/comics");
     } catch (err: any) {
       api.error({
         message: err.message,
@@ -114,7 +114,7 @@ const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
               />
             </div>
             <Tabs
-              defaultActiveKey="1"
+              defaultActiveKey="0"
               type="card"
               centered
               animated
@@ -123,13 +123,11 @@ const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
                   label: "Login",
                   key: "0",
                   children: <LoginForm onFinishLogin={onFinishLogin} />,
-                  forceRender: true,
                 },
                 {
                   label: "Register",
                   key: "1",
                   children: <RegisterForm onFinishRegister={onFinishRegister}/>,
-                  forceRender: true,
                 },
               ]}
             />

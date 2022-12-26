@@ -2,7 +2,7 @@ import nookies, { destroyCookie } from "nookies";
 import BaseLayout from "../../components/layout/BaseLayout";
 import axios from "axios";
 import Container from "../../components/ui/Container";
-import { Card, Form, Input, Button, Col, Row, notification } from "antd";
+import { Card, Form, Input, Button, Col, Row, notification, Modal } from "antd";
 import style from "./style.module.css";
 import { useState } from "react";
 import { useRouter } from "next/router";
@@ -72,6 +72,7 @@ const ProfilePage = ({
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const router = useRouter();
   const [api, contextHolder] = notification.useNotification();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const onFieldsChange = () => {
     setButtonDisabled(false);
@@ -90,7 +91,7 @@ const ProfilePage = ({
         placement: "topRight",
       });
 
-      router.push('/profile')
+      router.push("/profile");
     } catch (err: any) {
       api.error({
         message: err.message,
@@ -99,7 +100,44 @@ const ProfilePage = ({
     }
   };
 
-  const deleteUser = async () => {};
+  const deleteUser = async () => {
+    try {
+      const result = await axios.delete(`${baseURL}/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if(result) {
+        destroyCookie(null, tokenName);
+
+        api.info({
+          message: "Account deleted",
+          placement: "topRight",
+        });
+  
+        router.push("/login");
+      }
+
+    } catch (err: any) {
+      api.error({
+        message: err.message,
+        placement: "topRight",
+      });
+    }
+  };
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    deleteUser()
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <BaseLayout
@@ -109,7 +147,6 @@ const ProfilePage = ({
       tokenName={tokenName}
     >
       <Container>
-        {contextHolder}
         <Col xs={24} sm={24} md={18} lg={16} xl={8}>
           <Card title="Profile">
             <Form
@@ -158,8 +195,8 @@ const ProfilePage = ({
 
                 <Col span={12}>
                   <Form.Item className={style.wrapperButton}>
-                    <Button block type="text" danger onClick={deleteUser}>
-                      Delete user
+                    <Button block type="text" danger onClick={showModal}>
+                      Delete account
                     </Button>
                   </Form.Item>
                 </Col>
@@ -168,6 +205,17 @@ const ProfilePage = ({
           </Card>
         </Col>
       </Container>
+
+      {contextHolder}
+
+      <Modal
+        title="Delete account"
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        Are you sure you want to delete your account?
+      </Modal>
     </BaseLayout>
   );
 };

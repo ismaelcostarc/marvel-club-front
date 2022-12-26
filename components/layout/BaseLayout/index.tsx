@@ -7,7 +7,7 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 import style from "./style.module.css";
-import UserCard from "../UserCard";
+import UserCard from "../../ui/UserCard";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -44,8 +44,8 @@ const getItem = (
 
 const routes = [
   "",
-  "/lists/comics",
-  "/lists/characters",
+  "/search/comics",
+  "/search/characters",
   "",
   "/bookmarks/comics",
   "/bookmarks/characters",
@@ -117,7 +117,7 @@ export default function BaseLayout({
   const title = pathname[1].toUpperCase() + pathname.substring(2);
 
   const items: MenuItem[] = [
-    getItem("Lists", "0", <UnorderedListOutlined />, [
+    getItem("Search", "0", <UnorderedListOutlined />, [
       getItem("Comics", "1"),
       getItem("Characters", "2"),
     ]),

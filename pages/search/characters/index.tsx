@@ -1,6 +1,7 @@
 import axios from "axios";
 import nookies, { destroyCookie } from "nookies";
 import BaseLayout from "../../../components/layout/BaseLayout";
+import BaseHeader from "../../../components/ui/BaseHeader";
 
 type GetUserResponse = {
   name: string;
@@ -47,12 +48,12 @@ export async function getServerSideProps(context: any) {
   }
 }
 
-const CharactersListPage = ({ token, name, pathname, baseURL, tokenName }: any): JSX.Element => {
+const CharactersSearchPage = ({ token, name, pathname, baseURL, tokenName }: any): JSX.Element => {
   return (
     <BaseLayout name={name} pathname={pathname} baseURL={baseURL} tokenName={tokenName}>
-      <div>characters list</div>
+      <BaseHeader>Characters Search</BaseHeader>
     </BaseLayout>
   );
 };
 
-export default CharactersListPage;
+export default CharactersSearchPage;
