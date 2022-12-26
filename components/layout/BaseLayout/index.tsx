@@ -14,6 +14,8 @@ import { useEffect, useState } from "react";
 
 type BaseLayoutProps = {
   children: React.ReactNode;
+  name: string;
+  pathname: string;
 };
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -23,8 +25,7 @@ const getItem = (
   key: React.Key,
   icon?: React.ReactNode,
   children?: MenuItem[],
-  type?: "group",
-  style?: Object
+  type?: "group"
 ): MenuItem => {
   return {
     key,
@@ -42,21 +43,22 @@ const items: MenuItem[] = [
   getItem(
     <Button block>
       <LogoutOutlined /> Log out
-    </Button>, "3"
+    </Button>,
+    "3"
   ),
 ];
 
 const routes = ["/lists", "/bookmarks", "/profile"];
 
-export default function BaseLayout({ children }: BaseLayoutProps) {
+export default function BaseLayout({ children, name, pathname }: BaseLayoutProps) {
   const router = useRouter();
   const [actualKey, setActualKey] = useState("");
 
   useEffect(() => {
-    const key = routes.findIndex((route) => route === router.pathname);
+    const key = routes.findIndex((route) => route === pathname);
 
     setActualKey(`${key}`);
-  }, [router]);
+  }, [pathname]);
 
   const onClick = ({ key }: { key: string }) => {
     const route = routes[+key];
@@ -73,7 +75,7 @@ export default function BaseLayout({ children }: BaseLayoutProps) {
             height="70"
             alt="Marvel Logo"
           />
-          <UserCard name="Teste" />
+          <UserCard name={name} />
           <Menu
             theme="dark"
             items={items}
