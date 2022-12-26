@@ -1,8 +1,7 @@
-import { Card, Typography } from "antd";
+import { Card, Typography, Button } from "antd";
 import style from "./style.module.css";
 import Image from "next/image";
-
-const { Title } = Typography;
+import { StarFilled, CheckOutlined } from "@ant-design/icons";
 
 type ComicCardType = {
   title: string;
@@ -15,14 +14,27 @@ type ComicCardType = {
       ]
     | [];
   starred: boolean;
+  id: number;
 };
 
-const ComicCard = ({ title, images, starred }: ComicCardType) => {
+const ComicCard = ({ title, images, starred, id}: ComicCardType) => {
   const src =
     images.length !== 0 ? `${images[0].path}.${images[0].extension}` : "";
 
   return (
-    <Card className={style.card} title={title}>
+    <Card
+      className={style.card}
+      title={title}
+      actions={[
+        starred ? (
+          <Button><CheckOutlined /> Bookmarked</Button>
+        ) : (
+          <Button key="title">
+            <StarFilled /> Boomark this comic
+          </Button>
+        ),
+      ]}
+    >
       {images.length === 0 ? (
         <Image
           alt="Comic Cover"

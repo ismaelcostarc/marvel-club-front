@@ -97,31 +97,35 @@ const ComicsSearchPage = ({
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState("");
 
-  const onSearch = async (value: string) => {
+  useEffect(() => {
+    fetchComics(0);
+  }, [search]);
+
+  useEffect(() => {
+    const offset = pageSize * (page - 1);
+    fetchComics(offset);
+  }, [page, pageSize]);
+
+  const fetchComics = async (offset: number) => {
     try {
       const { data } = await axios.get(`${marvelURL}/comics`, {
         params: {
           ts,
           hash,
           apikey: marvelPublicKey,
-          titleStartsWith: value,
+          titleStartsWith: search,
           limit: pageSize,
+          offset,
         },
       });
+      const results: ComicType = data.data.results;
       setTotal(data.data.total);
-      setComics(data.data.results);
+      setComics(results as any);
     } catch (err) {
       console.error(err);
     }
-  };
-
-  const filteredComics = (): ComicType[] => {
-    const afterLastIndex = page * pageSize;
-    const initialIndex = afterLastIndex - pageSize;
-    const result = comics.slice(initialIndex, afterLastIndex);
-
-    return result;
   };
 
   return (
@@ -135,16 +139,17 @@ const ComicsSearchPage = ({
         <BaseHeader>Comics Search</BaseHeader>
         <Search
           placeholder="Search your comics typing the initial characters"
-          onSearch={onSearch}
+          onSearch={setSearch}
           enterButton
           size="large"
         />
 
         <BaseGrid>
-          {filteredComics().map((comic: ComicType) => (
+          {comics.map((comic: ComicType) => (
             <ComicCard
               title={comic.title}
               images={comic.images}
+              id={comic.id}
               starred
               key={comic.id}
             />
@@ -154,6 +159,7 @@ const ComicsSearchPage = ({
         <Pagination
           total={total}
           onShowSizeChange={(_, size) => setPageSize(size)}
+          onChange={setPage}
         />
       </Space>
     </BaseLayout>
