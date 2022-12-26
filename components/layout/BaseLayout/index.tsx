@@ -21,6 +21,7 @@ type BaseLayoutProps = {
   name: string;
   pathname: string;
   baseURL: string;
+  tokenName: string;
 };
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -48,6 +49,7 @@ export default function BaseLayout({
   name,
   pathname,
   baseURL,
+  tokenName
 }: BaseLayoutProps) {
   const router = useRouter();
   const [actualKey, setActualKey] = useState("");
@@ -61,7 +63,7 @@ export default function BaseLayout({
 
   const logOut = async () => {
     const cookies = nookies.get(null);
-    const token = cookies?.MARVEL_CLUB_TOKEN;
+    const token = cookies[tokenName];
     try {
       const {data} = await axios.post(`${baseURL}/user/logout`, {}, {
         headers: {
@@ -69,7 +71,7 @@ export default function BaseLayout({
         }
       });
       if(data) {
-        destroyCookie(null, "MARVEL_CLUB_TOKEN");
+        destroyCookie(null, tokenName);
         router.push("/login");
       }
     } catch (err: any) {

@@ -8,8 +8,9 @@ type GetUserResponse = {
 
 export async function getServerSideProps(context: any) {
   const cookies = nookies.get(context);
-  const token = cookies?.MARVEL_CLUB_TOKEN;
   const baseURL = process.env.BASE_URL;
+  const tokenName = process.env.TOKEN_NAME as string;
+  const token = cookies[tokenName];
   const pathname = context.resolvedUrl;
 
   if (!token) {
@@ -32,10 +33,10 @@ export async function getServerSideProps(context: any) {
     const name = data.name;
 
     return {
-      props: { token, name, pathname, baseURL },
+      props: { token, name, pathname, baseURL, tokenName },
     };
   } catch (err) {
-    destroyCookie(context, "MARVEL_CLUB_TOKEN");
+    destroyCookie(context, tokenName);
     return {
       redirect: {
         permanent: false,
@@ -46,9 +47,9 @@ export async function getServerSideProps(context: any) {
   }
 }
 
-const ListsPage = ({ token, name, pathname, baseURL }: any): JSX.Element => {
+const ListsPage = ({ token, name, pathname, baseURL, tokenName }: any): JSX.Element => {
   return (
-    <BaseLayout name={name} pathname={pathname} baseURL={baseURL}>
+    <BaseLayout name={name} pathname={pathname} baseURL={baseURL} tokenName={tokenName}>
       <div>list</div>
     </BaseLayout>
   );

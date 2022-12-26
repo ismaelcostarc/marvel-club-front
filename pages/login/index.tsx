@@ -16,8 +16,9 @@ const { useForm } = Form;
 
 export async function getServerSideProps(context: any) {
   const cookies = nookies.get(context);
-  const token = cookies?.MARVEL_CLUB_TOKEN;
+  const token = cookies[process.env.TOKEN_NAME as string];
   const baseURL = process.env.BASE_URL;
+  const tokenName = process.env.TOKEN_NAME as string;
 
   if (token) {
     try {
@@ -34,20 +35,21 @@ export async function getServerSideProps(context: any) {
         props: {},
       };
     } catch (err) {
-      destroyCookie(null, "MARVEL_CLUB_TOKEN");
+      destroyCookie(null, tokenName);
     }
   }
 
   return {
-    props: { baseURL },
+    props: { baseURL, tokenName },
   };
 }
 
 type LoginProps = {
   baseURL: string;
+  tokenName: string;
 };
 
-const LoginPage = ({ baseURL }: LoginProps): JSX.Element => {
+const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
   const [form] = useForm();
   const [api, contextHolder] = notification.useNotification();
   const router = useRouter();
@@ -56,7 +58,7 @@ const LoginPage = ({ baseURL }: LoginProps): JSX.Element => {
     try {
       const { data } = await axios.post(`${baseURL}/user/login`, values);
 
-      nookies.set(null, "MARVEL_CLUB_TOKEN", data.token, {
+      nookies.set(null, tokenName, data.token, {
         maxAge: 30 * 24 * 60 * 60,
         path: "*",
       });
