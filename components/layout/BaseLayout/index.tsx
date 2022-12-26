@@ -1,5 +1,5 @@
 import { Layout, Menu, MenuProps, Button, notification } from "antd";
-const { Header, Footer, Sider, Content } = Layout;
+const { Sider, Content } = Layout;
 import {
   UnorderedListOutlined,
   StarOutlined,
@@ -42,35 +42,52 @@ const getItem = (
   } as MenuItem;
 };
 
-const routes = ["/lists", "/bookmarks", "/profile"];
+const routes = [
+  "",
+  "/lists/comics",
+  "/lists/characters",
+  "",
+  "/bookmarks/comics",
+  "/bookmarks/characters",
+  "/profile",
+];
 
 export default function BaseLayout({
   children,
   name,
   pathname,
   baseURL,
-  tokenName
+  tokenName,
 }: BaseLayoutProps) {
   const router = useRouter();
   const [actualKey, setActualKey] = useState("");
+  const [actualGroup, setActualGroup] = useState("");
   const [api, contextHolder] = notification.useNotification();
 
   useEffect(() => {
-    const key = routes.findIndex((route) => route === pathname);
+    const key = routes.findIndex((route) => route === pathname).toString();
 
-    setActualKey(`${key}`);
+    setActualKey(key);
+    if (key !== "6") {
+      const group = ["1", "2"].includes(key) ? "0" : "3";
+      setActualGroup(group);
+    }
   }, [pathname]);
 
   const logOut = async () => {
     const cookies = nookies.get(null);
     const token = cookies[tokenName];
     try {
-      const {data} = await axios.post(`${baseURL}/user/logout`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const { data } = await axios.post(
+        `${baseURL}/user/logout`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
-      if(data) {
+      );
+      if (data) {
         destroyCookie(null, tokenName);
         router.push("/login");
       }
@@ -82,25 +99,37 @@ export default function BaseLayout({
     }
   };
 
-  const onClick = async ({ key }: { key: string }) => {
-    if (key === "3") await logOut();
-    else {
-      const route = routes[+key];
-      router.push(route);
+  const onClick = async ({ key }: {key: string}) => {
+    if (key === "7") await logOut();
+
+    const route = routes[+key];
+    router.push(route);
+  };
+
+  const onOpenChange = (arr: Array<string>) => {
+    if (arr.length === 0) {
+      return;
     }
+    setActualGroup(arr[1]);
   };
 
   const title = pathname[1].toUpperCase() + pathname.substring(2);
 
   const items: MenuItem[] = [
-    getItem("Lists", "0", <UnorderedListOutlined />),
-    getItem("Bookmarks", "1", <StarOutlined />),
-    getItem("Profile", "2", <ProfileOutlined />),
+    getItem("Lists", "0", <UnorderedListOutlined />, [
+      getItem("Comics", "1"),
+      getItem("Characters", "2"),
+    ]),
+    getItem("Bookmarks", "3", <StarOutlined />, [
+      getItem("Comics", "4"),
+      getItem("Characters", "5"),
+    ]),
+    getItem("Profile", "6", <ProfileOutlined />),
     getItem(
       <Button block>
         <LogoutOutlined /> Log out
       </Button>,
-      "3"
+      "7"
     ),
   ];
 
@@ -123,9 +152,11 @@ export default function BaseLayout({
             theme="dark"
             items={items}
             onClick={onClick}
-            mode="vertical"
+            onOpenChange={onOpenChange}
+            mode="inline"
             multiple={false}
             selectedKeys={[actualKey]}
+            openKeys={[actualGroup]}
           ></Menu>
         </Sider>
         <Content>

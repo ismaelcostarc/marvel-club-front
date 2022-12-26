@@ -1,10 +1,9 @@
-import { NextPageContext } from "next/types";
-import nookies, {destroyCookie} from "nookies";
-import BaseLayout from "../../components/layout/BaseLayout";
+import nookies, { destroyCookie } from "nookies";
+import BaseLayout from "../../../components/layout/BaseLayout";
 import axios from "axios";
 
 type GetUserResponse = {
-  name: string
+  name: string;
 };
 
 export async function getServerSideProps(context: any) {
@@ -48,13 +47,22 @@ export async function getServerSideProps(context: any) {
   }
 }
 
-const BookmarksPage = ({ name, pathname, baseURL, tokenName }: any): JSX.Element => {
-
+const BookmarkedCharactePage = ({
+  name,
+  pathname,
+  baseURL,
+  tokenName,
+}: any): JSX.Element => {
   return (
-    <BaseLayout name={name} pathname={pathname} baseURL={baseURL} tokenName={tokenName}>
-      <div>bookmarks</div>
+    <BaseLayout
+      name={name}
+      pathname={pathname}
+      baseURL={baseURL}
+      tokenName={tokenName}
+    >
+      <div>bookmarked characters</div>
     </BaseLayout>
   );
 };
 
-export default BookmarksPage;
+export default BookmarkedCharactePage;

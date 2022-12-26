@@ -63,7 +63,7 @@ const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
         path: "*",
       });
 
-      router.push("/lists");
+      router.push("/lists/comics");
     } catch (err: any) {
       api.error({
         message: err.message,
