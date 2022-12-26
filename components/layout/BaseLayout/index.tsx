@@ -1,4 +1,4 @@
-import { Layout, Menu, MenuProps, Button } from "antd";
+import { Layout, Menu, MenuProps, Button, notification } from "antd";
 const { Header, Footer, Sider, Content } = Layout;
 import {
   UnorderedListOutlined,
@@ -12,11 +12,15 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Head from "next/head";
+import nookies from "nookies";
+import { parseCookies, setCookie, destroyCookie } from "nookies";
+import axios from "axios";
 
 type BaseLayoutProps = {
   children: React.ReactNode;
   name: string;
   pathname: string;
+  baseURL: string;
 };
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -37,27 +41,17 @@ const getItem = (
   } as MenuItem;
 };
 
-const items: MenuItem[] = [
-  getItem("Lists", "0", <UnorderedListOutlined />),
-  getItem("Bookmarks", "1", <StarOutlined />),
-  getItem("Profile", "2", <ProfileOutlined />),
-  getItem(
-    <Button block>
-      <LogoutOutlined /> Log out
-    </Button>,
-    "3"
-  ),
-];
-
 const routes = ["/lists", "/bookmarks", "/profile"];
 
 export default function BaseLayout({
   children,
   name,
   pathname,
+  baseURL,
 }: BaseLayoutProps) {
   const router = useRouter();
   const [actualKey, setActualKey] = useState("");
+  const [api, contextHolder] = notification.useNotification();
 
   useEffect(() => {
     const key = routes.findIndex((route) => route === pathname);
@@ -65,15 +59,52 @@ export default function BaseLayout({
     setActualKey(`${key}`);
   }, [pathname]);
 
-  const onClick = ({ key }: { key: string }) => {
-    const route = routes[+key];
-    router.push(route);
+  const logOut = async () => {
+    const cookies = nookies.get(null);
+    const token = cookies.MARVEL_CLUB_TOKEN;
+    try {
+      const {data} = await axios.post(`${baseURL}/user/logout`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      if(data) {
+        destroyCookie(null, "MARVEL_CLUB_TOKEN");
+        router.push("/login");
+      }
+    } catch (err: any) {
+      api.error({
+        message: err.message,
+        placement: "topRight",
+      });
+    }
   };
 
-  const title = pathname[1].toUpperCase() + pathname.substring(2)
+  const onClick = async ({ key }: { key: string }) => {
+    if (key === "3") await logOut();
+    else {
+      const route = routes[+key];
+      router.push(route);
+    }
+  };
+
+  const title = pathname[1].toUpperCase() + pathname.substring(2);
+
+  const items: MenuItem[] = [
+    getItem("Lists", "0", <UnorderedListOutlined />),
+    getItem("Bookmarks", "1", <StarOutlined />),
+    getItem("Profile", "2", <ProfileOutlined />),
+    getItem(
+      <Button block>
+        <LogoutOutlined /> Log out
+      </Button>,
+      "3"
+    ),
+  ];
 
   return (
     <div className={style.container}>
+      {contextHolder}
       <Head>
         <title>{title}</title>
       </Head>

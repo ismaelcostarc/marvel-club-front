@@ -21,15 +21,13 @@ export async function getServerSideProps(context: any) {
   const name = data.name;
 
   return {
-    props: { token, name, pathname },
+    props: { token, name, pathname, baseURL },
   };
 }
 
-const ListsPage = ({ token, name, pathname }: any): JSX.Element => {
-  console.log(pathname)
-  const cookies = nookies.get(null);
+const ListsPage = ({ token, name, pathname, baseURL }: any): JSX.Element => {
   return (
-    <BaseLayout name={name} pathname={pathname}>
+    <BaseLayout name={name} pathname={pathname} baseURL={baseURL}>
       <div>list</div>
     </BaseLayout>
   );

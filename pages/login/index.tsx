@@ -38,7 +38,7 @@ const LoginPage = ({ baseURL }: LoginProps): JSX.Element => {
         path: "*",
       });
 
-      router.push('/list')
+      router.push('/lists')
     } catch (err: any) {
       api.error({
         message: err.message,
