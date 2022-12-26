@@ -1,18 +1,14 @@
-import { Form, Card, Input, Button, Space, notification } from "antd";
+import { Form, Card, Col, Space, notification, Tabs } from "antd";
+import nookies, { destroyCookie } from "nookies";
+import { useRouter } from "next/router";
 import Image from "next/image";
 import Container from "../../components/ui/Container";
 import style from "./style.module.css";
 import axios from "axios";
-import nookies, { destroyCookie } from "nookies";
-import { useRouter } from "next/router";
 import Head from "next/head";
-
-type CredentialsType = {
-  email: string;
-  password: string;
-};
-
-const { useForm } = Form;
+import LoginForm from "./components/LoginForm";
+import RegisterForm from "./components/RegisterForm";
+import { CredentialsType, UserType } from "./types";
 
 export async function getServerSideProps(context: any) {
   const cookies = nookies.get(context);
@@ -50,11 +46,10 @@ type LoginProps = {
 };
 
 const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
-  const [form] = useForm();
   const [api, contextHolder] = notification.useNotification();
   const router = useRouter();
 
-  const onFinish = async (values: CredentialsType) => {
+  const onFinishLogin = async (values: CredentialsType) => {
     try {
       const { data } = await axios.post(`${baseURL}/user/login`, values);
 
@@ -72,6 +67,28 @@ const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
     }
   };
 
+  const onFinishRegister = async (values: UserType) => {
+    const newUser = {
+      ...values,
+      phone: values.phone.replace(/[()-\s]/g, "")
+    }
+    try {
+      const { data } = await axios.post(`${baseURL}/user`, newUser)
+
+      nookies.set(null, tokenName, data.token, {
+        maxAge: 30 * 24 * 60 * 60,
+        path: "*",
+      });
+
+      router.push("/lists/comics");
+    } catch (err: any) {
+      api.error({
+        message: err.message,
+        placement: "topRight",
+      });
+    }
+  }
+
   return (
     <Container>
       {contextHolder}
@@ -84,51 +101,40 @@ const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
         <source src="assets/background-login.mp4" type="video/mp4" />
       </video>
 
-      <Card>
-        <Space direction="vertical" size="large">
-          <div className={style.logo}>
-            <Image
-              alt="Marvel logo"
-              src="/assets/marvel-logo.png"
-              width="100"
-              height="50"
+      <Col xs={24} sm={24} md={20} lg={14} xl={6}>
+        <Card>
+          <Space direction="vertical" size="large" style={{ width: "100%" }}>
+            <div className={style.logo}>
+              <Image
+                alt="Marvel logo"
+                src="/assets/marvel-logo.png"
+                width="100"
+                height="50"
+              />
+            </div>
+            <Tabs
+              defaultActiveKey="1"
+              type="card"
+              centered
+              animated
+              items={[
+                {
+                  label: "Login",
+                  key: "0",
+                  children: <LoginForm onFinishLogin={onFinishLogin} />,
+                  forceRender: true,
+                },
+                {
+                  label: "Register",
+                  key: "1",
+                  children: <RegisterForm onFinishRegister={onFinishRegister}/>,
+                  forceRender: true,
+                },
+              ]}
             />
-          </div>
-
-          <Form
-            wrapperCol={{ span: 24 }}
-            layout="vertical"
-            onFinish={onFinish}
-            form={form}
-          >
-            <Form.Item
-              label="E-mail"
-              name="email"
-              rules={[
-                { required: true, message: "Please input your username!" },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[
-                { required: true, message: "Please input your password!" },
-              ]}
-            >
-              <Input.Password />
-            </Form.Item>
-
-            <Form.Item>
-              <Button htmlType="submit" type="primary" block danger>
-                Login
-              </Button>
-            </Form.Item>
-          </Form>
-        </Space>
-      </Card>
+          </Space>
+        </Card>
+      </Col>
     </Container>
   );
 };
