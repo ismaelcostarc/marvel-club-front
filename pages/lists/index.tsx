@@ -8,7 +8,7 @@ type GetUserResponse = {
 
 export async function getServerSideProps(context: any) {
   const cookies = nookies.get(context);
-  const token = cookies.MARVEL_CLUB_TOKEN;
+  const token = cookies?.MARVEL_CLUB_TOKEN;
   const baseURL = process.env.BASE_URL;
   const pathname = context.resolvedUrl;
 

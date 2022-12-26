@@ -3,8 +3,9 @@ import Image from "next/image";
 import Container from "../../components/ui/Container";
 import style from "./style.module.css";
 import axios from "axios";
-import nookies from "nookies";
+import nookies, { destroyCookie } from "nookies";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 type CredentialsType = {
   email: string;
@@ -13,8 +14,30 @@ type CredentialsType = {
 
 const { useForm } = Form;
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context: any) {
+  const cookies = nookies.get(context);
+  const token = cookies?.MARVEL_CLUB_TOKEN;
   const baseURL = process.env.BASE_URL;
+
+  if (token) {
+    try {
+      await axios.get(`${baseURL}/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/lists",
+        },
+        props: {},
+      };
+    } catch (err) {
+      destroyCookie(null, "MARVEL_CLUB_TOKEN");
+    }
+  }
+
   return {
     props: { baseURL },
   };
@@ -38,7 +61,7 @@ const LoginPage = ({ baseURL }: LoginProps): JSX.Element => {
         path: "*",
       });
 
-      router.push('/lists')
+      router.push("/lists");
     } catch (err: any) {
       api.error({
         message: err.message,

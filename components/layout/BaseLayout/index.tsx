@@ -13,7 +13,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import nookies from "nookies";
-import { parseCookies, setCookie, destroyCookie } from "nookies";
+import { destroyCookie } from "nookies";
 import axios from "axios";
 
 type BaseLayoutProps = {
@@ -61,7 +61,7 @@ export default function BaseLayout({
 
   const logOut = async () => {
     const cookies = nookies.get(null);
-    const token = cookies.MARVEL_CLUB_TOKEN;
+    const token = cookies?.MARVEL_CLUB_TOKEN;
     try {
       const {data} = await axios.post(`${baseURL}/user/logout`, {}, {
         headers: {
