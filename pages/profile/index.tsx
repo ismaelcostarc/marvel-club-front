@@ -2,13 +2,21 @@ import nookies, { destroyCookie } from "nookies";
 import BaseLayout from "../../components/layout/BaseLayout";
 import axios from "axios";
 import Container from "../../components/ui/Container";
-import { Card, Form, Input, Button, Col, Row } from "antd";
+import { Card, Form, Input, Button, Col, Row, notification } from "antd";
 import style from "./style.module.css";
-import { MaskedInput } from "antd-mask-input";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 type GetUserResponse = {
   name: string;
+};
+
+type UserType = {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+  address: string;
 };
 
 const { useForm } = Form;
@@ -61,14 +69,38 @@ const ProfilePage = ({
 }: any): JSX.Element => {
   const [form] = useForm();
   const cookies = nookies.get(null);
-  const [newUser, setNewUser] = useState(user);
-  const [buttonDisabled, setButtonDisabled] = useState(true)
+  const [buttonDisabled, setButtonDisabled] = useState(true);
+  const router = useRouter();
+  const [api, contextHolder] = notification.useNotification();
 
   const onFieldsChange = () => {
-    setButtonDisabled(false)
-  }
+    setButtonDisabled(false);
+  };
 
-  console.log(user);
+  const updateUser = async (values: UserType) => {
+    try {
+      await axios.put(`${baseURL}/user`, values, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      api.success({
+        message: "User updated",
+        placement: "topRight",
+      });
+
+      router.push('/profile')
+    } catch (err: any) {
+      api.error({
+        message: err.message,
+        placement: "topRight",
+      });
+    }
+  };
+
+  const deleteUser = async () => {};
+
   return (
     <BaseLayout
       name={user.name}
@@ -77,11 +109,18 @@ const ProfilePage = ({
       tokenName={tokenName}
     >
       <Container>
+        {contextHolder}
         <Col xs={24} sm={24} md={18} lg={16} xl={8}>
           <Card title="Profile">
-            <Form form={form} layout="vertical" initialValues={user} onFieldsChange={onFieldsChange}>
+            <Form
+              form={form}
+              layout="vertical"
+              initialValues={user}
+              onFieldsChange={onFieldsChange}
+              onFinish={updateUser}
+            >
               <Form.Item name="name" label="Name">
-                <Input/>
+                <Input />
               </Form.Item>
 
               <Form.Item name="address" label="Address">
@@ -93,7 +132,7 @@ const ProfilePage = ({
               </Form.Item>
 
               <Form.Item name="phone" label="Phone">
-                <MaskedInput mask={"(00) 00000-0000"} />
+                <Input />
               </Form.Item>
 
               <Form.Item name="password" label="Password">
@@ -106,7 +145,12 @@ const ProfilePage = ({
               <Row justify="end">
                 <Col span={12}>
                   <Form.Item className={style.wrapperButton}>
-                    <Button block type="primary" disabled={buttonDisabled}>
+                    <Button
+                      block
+                      type="primary"
+                      disabled={buttonDisabled}
+                      htmlType="submit"
+                    >
                       Update
                     </Button>
                   </Form.Item>
@@ -114,7 +158,7 @@ const ProfilePage = ({
 
                 <Col span={12}>
                   <Form.Item className={style.wrapperButton}>
-                    <Button block type="text" danger>
+                    <Button block type="text" danger onClick={deleteUser}>
                       Delete user
                     </Button>
                   </Form.Item>

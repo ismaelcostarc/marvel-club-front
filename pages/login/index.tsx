@@ -72,6 +72,7 @@ const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
       ...values,
       phone: values.phone.replace(/[()-\s]/g, "")
     }
+    
     try {
       const { data } = await axios.post(`${baseURL}/user`, newUser)
 
