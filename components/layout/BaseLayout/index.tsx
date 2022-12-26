@@ -99,11 +99,12 @@ export default function BaseLayout({
     }
   };
 
-  const onClick = async ({ key }: {key: string}) => {
+  const onClick = async ({ key }: { key: string }) => {
     if (key === "7") await logOut();
-
-    const route = routes[+key];
-    router.push(route);
+    else {
+      const route = routes[+key];
+      router.push(route);
+    }
   };
 
   const onOpenChange = (arr: Array<string>) => {

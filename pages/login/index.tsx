@@ -30,7 +30,7 @@ export async function getServerSideProps(context: any) {
       return {
         redirect: {
           permanent: false,
-          destination: "/lists",
+          destination: "/lists/comics",
         },
         props: {},
       };
