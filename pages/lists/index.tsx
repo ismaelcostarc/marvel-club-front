@@ -1,9 +1,9 @@
 import axios from "axios";
-import nookies from "nookies";
+import nookies, { destroyCookie } from "nookies";
 import BaseLayout from "../../components/layout/BaseLayout";
 
 type GetUserResponse = {
-  name: string
+  name: string;
 };
 
 export async function getServerSideProps(context: any) {
@@ -12,17 +12,38 @@ export async function getServerSideProps(context: any) {
   const baseURL = process.env.BASE_URL;
   const pathname = context.resolvedUrl;
 
-  const { data } = await axios.get<GetUserResponse>(`${baseURL}/user`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  if (!token) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+      props: {},
+    };
+  }
 
-  const name = data.name;
+  try {
+    const { data } = await axios.get<GetUserResponse>(`${baseURL}/user`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  return {
-    props: { token, name, pathname, baseURL },
-  };
+    const name = data.name;
+
+    return {
+      props: { token, name, pathname, baseURL },
+    };
+  } catch (err) {
+    destroyCookie(context, "MARVEL_CLUB_TOKEN");
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+      props: {},
+    };
+  }
 }
 
 const ListsPage = ({ token, name, pathname, baseURL }: any): JSX.Element => {

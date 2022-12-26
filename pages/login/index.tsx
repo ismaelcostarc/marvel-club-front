@@ -5,7 +5,7 @@ import style from "./style.module.css";
 import axios from "axios";
 import nookies, { destroyCookie } from "nookies";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import Head from "next/head";
 
 type CredentialsType = {
   email: string;
@@ -74,6 +74,10 @@ const LoginPage = ({ baseURL }: LoginProps): JSX.Element => {
     <Container>
       {contextHolder}
 
+      <Head>
+        <title>Marvel Club</title>
+      </Head>
+
       <video autoPlay muted loop className={style.backgroundVideo}>
         <source src="assets/background-login.mp4" type="video/mp4" />
       </video>
@@ -116,7 +120,7 @@ const LoginPage = ({ baseURL }: LoginProps): JSX.Element => {
             </Form.Item>
 
             <Form.Item>
-              <Button htmlType="submit" type="primary" block>
+              <Button htmlType="submit" type="primary" block danger>
                 Login
               </Button>
             </Form.Item>
