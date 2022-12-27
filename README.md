@@ -1,6 +1,6 @@
 # Marvel Club Front
 
-Projeto feito para ser possível pesquisar e favoritar HQs e Personagens da Marvel. Possui login e cadastro de usuário.
+Projeto feito para ser possível pesquisar e favoritar HQs e Personagens da Marvel. Possui login e cadastro de usuário. A autenticação, e redirecionamento para outra página caso necessário, são realizados no servidor, antes da página ser enviada ao browser.
 
 ### Tecnologias
 
