@@ -60,12 +60,16 @@ const ComicCard = ({
       ]}
     >
       <CoverCard imageUrl={imageUrl} width={width} height={height} />
-      <BaseModal
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
-        id={id}
-        cover={<CoverCard imageUrl={imageUrl} width={width} height={height} />}
-      />
+      {type === "comic" && (
+        <BaseModal
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          id={id}
+          cover={
+            <CoverCard imageUrl={imageUrl} width={width} height={height} />
+          }
+        />
+      )}
     </Card>
   );
 };
