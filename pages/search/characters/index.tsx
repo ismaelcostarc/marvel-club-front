@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Input, Pagination, Row, Space, notification } from "antd";
-import { useEffect, useState } from "react";
-import { CharacterType } from "../../../types";
+import { useEffect, useState, useContext } from "react";
+import { BookmarkType, CharacterType } from "../../../types";
 import nookies, { destroyCookie } from "nookies";
+import BookMarkContext from "../../../contexts/BoomarkContext";
 import BaseCard from "../../../components/ui/BaseCard";
 import BaseGrid from "../../../components/ui/BaseGrid";
 import BaseHeader from "../../../components/ui/BaseHeader";
@@ -91,8 +92,8 @@ const CharactersSearchPage = ({
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [api, contextHolder] = notification.useNotification();
-  const [markedCharacters, setMarkedCharacters] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
+  const { bookmarkedCharacters, setBookmarkedCharacters } = useContext(BookMarkContext);
 
   useEffect(() => {
     if (search) fetchCharacters(0);
@@ -102,6 +103,30 @@ const CharactersSearchPage = ({
     const offset = pageSize * (page - 1);
     if (search) fetchCharacters(offset);
   }, [page, pageSize]);
+
+  useEffect(() => {
+    fetchBookmarkedCharacters();
+  }, []);
+
+  const fetchBookmarkedCharacters = async () => {
+    try {
+      const { data } = await axios.get(`${baseURL}/character`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const bookmarkedCharacters = data.map((bookmarkedCharacter: BookmarkType) => ({
+        id: bookmarkedCharacter.id,
+        code: +bookmarkedCharacter.code,
+      }));
+      setBookmarkedCharacters(bookmarkedCharacters);
+    } catch (err: any) {
+      api.error({
+        message: err.message,
+        placement: "topRight",
+      });
+    }
+  };
 
   const fetchCharacters = async (offset: number) => {
     try {
@@ -129,20 +154,19 @@ const CharactersSearchPage = ({
     }
   };
 
-  const mark = async (id: number) => {
+  const mark = async (code: number) => {
     try {
-      await axios.post(
+      const { data } = await axios.post(
         `${baseURL}/character`,
-        {
-          code: id,
-        },
+        { code },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      setMarkedCharacters([...markedCharacters, id]);
+      const { id } = data;
+      setBookmarkedCharacters([...bookmarkedCharacters, { code, id }]);
     } catch (err: any) {
       api.error({
         message: err.message,
@@ -150,6 +174,35 @@ const CharactersSearchPage = ({
       });
     }
   };
+
+  const markOff = async (code: number) => {
+    try {
+      const { id } = bookmarkedCharacters.find(
+        (bookmarkedComic) => bookmarkedComic.code === code
+      )!;
+
+      await axios.delete(`${baseURL}/character/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setBookmarkedCharacters(
+        bookmarkedCharacters.filter((bookmarkedComic) => bookmarkedComic.id !== id)
+      );
+    } catch (err: any) {
+      api.error({
+        message: err.message,
+        placement: "topRight",
+      });
+    }
+  };
+
+  const isCharacterBookmarked = (character: CharacterType) =>
+    bookmarkedCharacters.some(
+      (bookmarkedCharacter) => bookmarkedCharacter.code === character.id
+    );
+
 
   return (
     <BaseLayout
@@ -184,13 +237,13 @@ const CharactersSearchPage = ({
                     character.thumbnail.extension
                   }
                   id={character.id}
-                  starred={markedCharacters.includes(character.id)}
+                  starred={isCharacterBookmarked(character)}
                   width={180}
                   height={200}
                   key={character.id}
                   openModal={() => {}}
                   mark={mark}
-                  markOff={() => {}}
+                  markOff={markOff}
                 />
               ))}
             </BaseGrid>
