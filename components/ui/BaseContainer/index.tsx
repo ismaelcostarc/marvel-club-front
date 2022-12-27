@@ -1,13 +1,13 @@
 import style from "./style.module.css";
 
-type ContainerProps = {
+type BaseBaseContainerProps = {
   children: React.ReactNode;
 };
 
-const Container: React.FunctionComponent<ContainerProps> = ({
+const BaseBaseContainer: React.FunctionComponent<BaseBaseContainerProps> = ({
   children,
 }): JSX.Element => {
   return <div className={style.container}>{children}</div>;
 };
 
-export default Container;
+export default BaseBaseContainer;

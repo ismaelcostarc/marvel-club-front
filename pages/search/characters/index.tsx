@@ -1,15 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Pagination, Input, Space, Row, notification } from "antd";
-import axios from "axios";
-import nookies, { destroyCookie } from "nookies";
+import { Input, Pagination, Row, Space, notification } from "antd";
 import { useEffect, useState } from "react";
-import BaseLayout from "../../../components/layout/BaseLayout";
-import BaseHeader from "../../../components/ui/BaseHeader";
-import md5 from "blueimp-md5";
 import { CharacterType } from "../../../types";
-import BaseGrid from "../../../components/ui/BaseGrid";
+import nookies, { destroyCookie } from "nookies";
 import BaseCard from "../../../components/ui/BaseCard";
+import BaseGrid from "../../../components/ui/BaseGrid";
+import BaseHeader from "../../../components/ui/BaseHeader";
+import BaseLayout from "../../../components/layout/BaseLayout";
 import Image from "next/image";
+import axios from "axios";
+import md5 from "blueimp-md5";
 
 type GetUserResponse = {
   name: string;
@@ -91,9 +91,11 @@ const CharactersSearchPage = ({
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [api, contextHolder] = notification.useNotification();
+  const [markedCharacters, setMarkedCharacters] = useState<number[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchCharacters(0);
+    if (search) fetchCharacters(0);
   }, [search]);
 
   useEffect(() => {
@@ -103,6 +105,7 @@ const CharactersSearchPage = ({
 
   const fetchCharacters = async (offset: number) => {
     try {
+      setLoading(true)
       const { data } = await axios.get(`${marvelURL}/characters`, {
         params: {
           ts,
@@ -116,6 +119,30 @@ const CharactersSearchPage = ({
       const results: CharacterType = data.data.results;
       setTotal(data.data.total);
       setCharacters(results as any);
+      setLoading(false)
+    } catch (err: any) {
+      setLoading(false)
+      api.error({
+        message: err.message,
+        placement: "topRight",
+      });
+    }
+  };
+
+  const mark = async (id: number) => {
+    try {
+      await axios.post(
+        `${baseURL}/character`,
+        {
+          code: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setMarkedCharacters([...markedCharacters, id]);
     } catch (err: any) {
       api.error({
         message: err.message,
@@ -135,11 +162,13 @@ const CharactersSearchPage = ({
 
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
         <BaseHeader>Characters Search</BaseHeader>
+
         <Search
           placeholder="Search your characters typing the initial characters"
           onSearch={setSearch}
           enterButton
           size="large"
+          loading={loading}
         />
 
         {characters.length !== 0 ? (
@@ -155,12 +184,12 @@ const CharactersSearchPage = ({
                     character.thumbnail.extension
                   }
                   id={character.id}
-                  starred
+                  starred={markedCharacters.includes(character.id)}
                   width={180}
                   height={200}
                   key={character.id}
                   openModal={() => {}}
-                  mark={() => {}}
+                  mark={mark}
                   markOff={() => {}}
                 />
               ))}

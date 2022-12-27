@@ -1,7 +1,7 @@
-import { Card, Typography, Button } from "antd";
+import { Card, Button } from "antd";
+import { StarOutlined, StarFilled } from "@ant-design/icons";
 import style from "./style.module.css";
 import Image from "next/image";
-import { StarOutlined, StarFilled } from "@ant-design/icons";
 
 type ComicCardType = {
   title: string;
@@ -33,14 +33,14 @@ const ComicCard = ({
       actions={[
         starred ? (
           <Button key="bookmark" type="text" onClick={() => markOff(id)}>
-            <StarFilled />
+            <StarFilled style={{fontSize:"20px"}}/>
           </Button>
         ) : (
           <Button key="bookmark" type="text" onClick={() => mark(id)}>
-            <StarOutlined />
+            <StarOutlined style={{fontSize:"20px"}}/>
           </Button>
         ),
-        <Button key="description" type="text" onClick={() => openModal(id)}>
+        <Button key="description" type="text" onClick={() => openModal(id)} >
           About
         </Button>,
       ]}

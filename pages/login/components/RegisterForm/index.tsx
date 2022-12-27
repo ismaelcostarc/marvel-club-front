@@ -1,6 +1,6 @@
 import { Form, Input, Button } from "antd";
 import { MaskedInput } from "antd-mask-input";
-import { UserType } from "../../types";
+import { UserType } from "../../../../types";
 
 const { useForm } = Form;
 

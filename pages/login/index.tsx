@@ -1,14 +1,20 @@
-import { Form, Card, Col, Space, notification, Tabs } from "antd";
-import nookies, { destroyCookie } from "nookies";
+import { Card, Col, Space, notification, Tabs } from "antd";
+import { CredentialsType } from "./types";
+import { UserType } from "../../types";
 import { useRouter } from "next/router";
+import nookies, { destroyCookie } from "nookies";
 import Image from "next/image";
-import Container from "../../components/ui/Container";
+import BaseContainer from "../../components/ui/BaseContainer";
 import style from "./style.module.css";
 import axios from "axios";
 import Head from "next/head";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
-import { CredentialsType, UserType } from "./types";
+
+type LoginProps = {
+  baseURL: string;
+  tokenName: string;
+};
 
 export async function getServerSideProps(context: any) {
   const cookies = nookies.get(context);
@@ -39,11 +45,6 @@ export async function getServerSideProps(context: any) {
     props: { baseURL, tokenName },
   };
 }
-
-type LoginProps = {
-  baseURL: string;
-  tokenName: string;
-};
 
 const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
   const [api, contextHolder] = notification.useNotification();
@@ -91,7 +92,7 @@ const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
   }
 
   return (
-    <Container>
+    <BaseContainer>
       {contextHolder}
 
       <Head>
@@ -134,7 +135,7 @@ const LoginPage = ({ baseURL, tokenName }: LoginProps): JSX.Element => {
           </Space>
         </Card>
       </Col>
-    </Container>
+    </BaseContainer>
   );
 };
 

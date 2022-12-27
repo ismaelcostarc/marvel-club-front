@@ -1,20 +1,19 @@
 import { Layout, Menu, MenuProps, Button, notification } from "antd";
-const { Sider, Content } = Layout;
+import { destroyCookie } from "nookies";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import {
   UnorderedListOutlined,
   StarOutlined,
   ProfileOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
+import Head from "next/head";
+import nookies from "nookies";
+import axios from "axios";
 import style from "./style.module.css";
 import UserCard from "../UserCard";
 import Image from "next/image";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import Head from "next/head";
-import nookies from "nookies";
-import { destroyCookie } from "nookies";
-import axios from "axios";
 
 type BaseLayoutProps = {
   children: React.ReactNode;
@@ -25,6 +24,8 @@ type BaseLayoutProps = {
 };
 
 type MenuItem = Required<MenuProps>["items"][number];
+
+const { Sider, Content } = Layout;
 
 const getItem = (
   label: React.ReactNode,
@@ -47,18 +48,18 @@ const routes = [
   "/search/comics",
   "/search/characters",
   "",
-  "/bookmarks/comics",
-  "/bookmarks/characters",
+  "/bookmark/comics",
+  "/bookmark/characters",
   "/profile",
 ];
 
-export default function BaseLayout({
+const BaseLayout = ({
   children,
   name,
   pathname,
   baseURL,
   tokenName,
-}: BaseLayoutProps) {
+}: BaseLayoutProps) => {
   const router = useRouter();
   const [actualKey, setActualKey] = useState("");
   const [actualGroup, setActualGroup] = useState("");
@@ -114,14 +115,17 @@ export default function BaseLayout({
     setActualGroup(arr[1]);
   };
 
-  const title = pathname[1].toUpperCase() + pathname.substring(2);
+  const title = (pathname[1].toUpperCase() + pathname.substring(2)).replace(
+    "/",
+    " "
+  );
 
   const items: MenuItem[] = [
     getItem("Search", "0", <UnorderedListOutlined />, [
       getItem("Comics", "1"),
       getItem("Characters", "2"),
     ]),
-    getItem("Bookmarks", "3", <StarOutlined />, [
+    getItem("Bookmark", "3", <StarOutlined />, [
       getItem("Comics", "4"),
       getItem("Characters", "5"),
     ]),
@@ -166,4 +170,6 @@ export default function BaseLayout({
       </Layout>
     </div>
   );
-}
+};
+
+export default BaseLayout;

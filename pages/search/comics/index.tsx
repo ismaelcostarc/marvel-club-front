@@ -1,15 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Pagination, Input, Space, Row, notification } from "antd";
-import axios from "axios";
-import nookies, { destroyCookie } from "nookies";
+import { Input, Pagination, Row, Space, notification } from "antd";
 import { useEffect, useState } from "react";
-import BaseLayout from "../../../components/layout/BaseLayout";
-import BaseHeader from "../../../components/ui/BaseHeader";
-import md5 from "blueimp-md5";
 import { ComicType } from "../../../types";
-import BaseGrid from "../../../components/ui/BaseGrid";
+import nookies, { destroyCookie } from "nookies";
 import BaseCard from "../../../components/ui/BaseCard";
+import BaseGrid from "../../../components/ui/BaseGrid";
+import BaseHeader from "../../../components/ui/BaseHeader";
+import BaseLayout from "../../../components/layout/BaseLayout";
 import Image from "next/image";
+import axios from "axios";
+import md5 from "blueimp-md5";
 
 type GetUserResponse = {
   name: string;
@@ -92,6 +92,7 @@ const ComicsSearchPage = ({
   const [search, setSearch] = useState("");
   const [api, contextHolder] = notification.useNotification();
   const [markedComics, setMarkedComics] = useState<number[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (search) fetchComics(0);
@@ -104,6 +105,7 @@ const ComicsSearchPage = ({
 
   const fetchComics = async (offset: number) => {
     try {
+      setLoading(true);
       const { data } = await axios.get(`${marvelURL}/comics`, {
         params: {
           ts,
@@ -117,7 +119,9 @@ const ComicsSearchPage = ({
       const results: ComicType = data.data.results;
       setTotal(data.data.total);
       setComics(results as any);
+      setLoading(false);
     } catch (err: any) {
+      setLoading(false);
       api.error({
         message: err.message,
         placement: "topRight",
@@ -159,7 +163,6 @@ const ComicsSearchPage = ({
 
   const markOff = async (id: number) => {
     try {
-
     } catch (err: any) {
       api.error({
         message: err.message,
@@ -167,7 +170,6 @@ const ComicsSearchPage = ({
       });
     }
   };
-  
 
   return (
     <BaseLayout
@@ -184,6 +186,7 @@ const ComicsSearchPage = ({
           onSearch={setSearch}
           enterButton
           size="large"
+          loading={loading}
         />
 
         {comics.length !== 0 ? (

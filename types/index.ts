@@ -19,3 +19,11 @@ export type CharacterType = {
     path: string;
   };
 };
+
+export type UserType = {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+  address: string;
+};

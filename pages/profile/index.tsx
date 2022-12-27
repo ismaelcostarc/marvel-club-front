@@ -1,22 +1,15 @@
+import { Card, Form, Input, Button, Col, Row, notification, Modal } from "antd";
+import { useState } from "react";
+import { useRouter } from "next/router";
+import { UserType } from "../../types";
 import nookies, { destroyCookie } from "nookies";
 import BaseLayout from "../../components/layout/BaseLayout";
 import axios from "axios";
-import Container from "../../components/ui/Container";
-import { Card, Form, Input, Button, Col, Row, notification, Modal } from "antd";
+import BaseContainer from "../../components/ui/BaseContainer";
 import style from "./style.module.css";
-import { useState } from "react";
-import { useRouter } from "next/router";
 
 type GetUserResponse = {
   name: string;
-};
-
-type UserType = {
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
-  address: string;
 };
 
 const { useForm } = Form;
@@ -68,7 +61,6 @@ const ProfilePage = ({
   tokenName,
 }: any): JSX.Element => {
   const [form] = useForm();
-  const cookies = nookies.get(null);
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const router = useRouter();
   const [api, contextHolder] = notification.useNotification();
@@ -146,7 +138,7 @@ const ProfilePage = ({
       baseURL={baseURL}
       tokenName={tokenName}
     >
-      <Container>
+      <BaseContainer>
         <Col xs={24} sm={24} md={18} lg={16} xl={8}>
           <Card title="Profile">
             <Form
@@ -204,7 +196,7 @@ const ProfilePage = ({
             </Form>
           </Card>
         </Col>
-      </Container>
+      </BaseContainer>
 
       {contextHolder}
 
