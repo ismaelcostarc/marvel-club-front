@@ -11,6 +11,7 @@ import BaseLayout from "../../../components/layout/BaseLayout";
 import Image from "next/image";
 import axios from "axios";
 import md5 from "blueimp-md5";
+import { isBookmarked, mark, markOff } from "../../../utils/search";
 
 type GetUserResponse = {
   name: string;
@@ -154,55 +155,13 @@ const CharactersSearchPage = ({
     }
   };
 
-  const mark = async (code: number) => {
-    try {
-      const { data } = await axios.post(
-        `${baseURL}/character`,
-        { code },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const { id } = data;
-      setBookmarkedCharacters([...bookmarkedCharacters, { code, id }]);
-    } catch (err: any) {
-      api.error({
-        message: err.message,
-        placement: "topRight",
-      });
-    }
-  };
+  const markCharacter = (code: number) => {
+    mark('character', code, baseURL, token, setBookmarkedCharacters, bookmarkedCharacters, api);
+  }
 
-  const markOff = async (code: number) => {
-    try {
-      const { id } = bookmarkedCharacters.find(
-        (bookmarkedComic) => bookmarkedComic.code === code
-      )!;
-
-      await axios.delete(`${baseURL}/character/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setBookmarkedCharacters(
-        bookmarkedCharacters.filter((bookmarkedComic) => bookmarkedComic.id !== id)
-      );
-    } catch (err: any) {
-      api.error({
-        message: err.message,
-        placement: "topRight",
-      });
-    }
-  };
-
-  const isCharacterBookmarked = (character: CharacterType) =>
-    bookmarkedCharacters.some(
-      (bookmarkedCharacter) => bookmarkedCharacter.code === character.id
-    );
-
+  const markOffCharacter = (code: number) => {
+    markOff('character', code, baseURL, token, setBookmarkedCharacters, bookmarkedCharacters, api);
+  }
 
   return (
     <BaseLayout
@@ -237,13 +196,13 @@ const CharactersSearchPage = ({
                     character.thumbnail.extension
                   }
                   id={character.id}
-                  starred={isCharacterBookmarked(character)}
+                  starred={isBookmarked(character, bookmarkedCharacters)}
                   width={180}
                   height={200}
                   key={character.id}
                   openModal={() => {}}
-                  mark={mark}
-                  markOff={markOff}
+                  mark={markCharacter}
+                  markOff={markOffCharacter}
                 />
               ))}
             </BaseGrid>

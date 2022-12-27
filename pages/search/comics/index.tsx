@@ -2,6 +2,7 @@
 import { Input, Pagination, Row, Space, notification } from "antd";
 import { useEffect, useState, useContext } from "react";
 import { BookmarkType, ComicType } from "../../../types";
+import { getImageUrl } from "../../../utils/comics";
 import nookies, { destroyCookie } from "nookies";
 import BookMarkContext from "../../../contexts/BoomarkContext";
 import BaseCard from "../../../components/ui/BaseCard";
@@ -11,6 +12,7 @@ import BaseLayout from "../../../components/layout/BaseLayout";
 import Image from "next/image";
 import axios from "axios";
 import md5 from "blueimp-md5";
+import { isBookmarked, mark, markOff } from "../../../utils/search";
 
 type GetUserResponse = {
   name: string;
@@ -74,16 +76,6 @@ export async function getServerSideProps(context: any) {
     };
   }
 }
-
-type imagesType = [] | [{ path: string; extension: string }];
-const getImageUrl = (images: imagesType): string => {
-  const image = images[0];
-  if (image) {
-    return `${image.path}.${image.extension}`;
-  } else {
-    return "";
-  }
-};
 
 const ComicsSearchPage = ({
   token,
@@ -164,55 +156,14 @@ const ComicsSearchPage = ({
     }
   };
 
-  const mark = async (code: number) => {
-    try {
-      const { data } = await axios.post(
-        `${baseURL}/comic`,
-        { code },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const { id } = data;
-      setBookmarkedComics([...bookmarkedComics, { code, id }]);
-    } catch (err: any) {
-      api.error({
-        message: err.message,
-        placement: "topRight",
-      });
-    }
-  };
+  const markComic = (code: number) => {
+    mark('comic', code, baseURL, token, setBookmarkedComics, bookmarkedComics, api);
+  }
 
-  const markOff = async (code: number) => {
-    try {
-      const { id } = bookmarkedComics.find(
-        (bookmarkedComic) => bookmarkedComic.code === code
-      )!;
-
-      await axios.delete(`${baseURL}/comic/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setBookmarkedComics(
-        bookmarkedComics.filter((bookmarkedComic) => bookmarkedComic.id !== id)
-      );
-    } catch (err: any) {
-      api.error({
-        message: err.message,
-        placement: "topRight",
-      });
-    }
-  };
-
-  const isComicBookmarked = (comic: ComicType) =>
-    bookmarkedComics.some(
-      (bookmarkedComic) => bookmarkedComic.code === comic.id
-    );
-
+  const markOffComic = (code: number) => {
+    markOff('comic', code, baseURL, token, setBookmarkedComics, bookmarkedComics, api);
+  }
+  
   return (
     <BaseLayout
       name={name}
@@ -241,11 +192,11 @@ const ComicsSearchPage = ({
                   width={150}
                   height={200}
                   id={comic.id}
-                  starred={isComicBookmarked(comic)}
+                  starred={isBookmarked(comic, bookmarkedComics)}
                   key={comic.id}
                   openModal={() => {}}
-                  mark={mark}
-                  markOff={markOff}
+                  mark={markComic}
+                  markOff={markOffComic}
                 />
               ))}
             </BaseGrid>
