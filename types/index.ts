@@ -27,3 +27,8 @@ export type UserType = {
   phone: string;
   address: string;
 };
+
+export type BookmarkType = {
+  id: number;
+  code: number;
+}

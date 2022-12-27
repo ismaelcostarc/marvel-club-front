@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Input, Pagination, Row, Space, notification } from "antd";
-import { useEffect, useState } from "react";
-import { ComicType } from "../../../types";
+import { useEffect, useState, useContext } from "react";
+import { BookmarkType, ComicType } from "../../../types";
 import nookies, { destroyCookie } from "nookies";
+import BookMarkContext from "../../../contexts/BoomarkContext";
 import BaseCard from "../../../components/ui/BaseCard";
 import BaseGrid from "../../../components/ui/BaseGrid";
 import BaseHeader from "../../../components/ui/BaseHeader";
@@ -74,6 +75,16 @@ export async function getServerSideProps(context: any) {
   }
 }
 
+type imagesType = [] | [{ path: string; extension: string }];
+const getImageUrl = (images: imagesType): string => {
+  const image = images[0];
+  if (image) {
+    return `${image.path}.${image.extension}`;
+  } else {
+    return "";
+  }
+};
+
 const ComicsSearchPage = ({
   token,
   name,
@@ -91,8 +102,8 @@ const ComicsSearchPage = ({
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [api, contextHolder] = notification.useNotification();
-  const [markedComics, setMarkedComics] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
+  const { bookmarkedComics, setBookmarkedComics } = useContext(BookMarkContext);
 
   useEffect(() => {
     if (search) fetchComics(0);
@@ -102,6 +113,30 @@ const ComicsSearchPage = ({
     const offset = pageSize * (page - 1);
     if (search) fetchComics(offset);
   }, [page, pageSize]);
+
+  useEffect(() => {
+    fetchBookmarkedComics();
+  }, []);
+
+  const fetchBookmarkedComics = async () => {
+    try {
+      const { data } = await axios.get(`${baseURL}/comic/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const bookmarkedComics = data.map((bookmarkedComic: BookmarkType) => ({
+        id: bookmarkedComic.id,
+        code: +bookmarkedComic.code,
+      }));
+      setBookmarkedComics(bookmarkedComics);
+    } catch (err: any) {
+      api.error({
+        message: err.message,
+        placement: "topRight",
+      });
+    }
+  };
 
   const fetchComics = async (offset: number) => {
     try {
@@ -129,30 +164,19 @@ const ComicsSearchPage = ({
     }
   };
 
-  type imagesType = [] | [{ path: string; extension: string }];
-  const getImageUrl = (images: imagesType): string => {
-    const image = images[0];
-    if (image) {
-      return `${image.path}.${image.extension}`;
-    } else {
-      return "";
-    }
-  };
-
-  const mark = async (id: number) => {
+  const mark = async (code: number) => {
     try {
-      await axios.post(
+      const { data } = await axios.post(
         `${baseURL}/comic`,
-        {
-          code: id,
-        },
+        { code },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      setMarkedComics([...markedComics, id]);
+      const { id } = data;
+      setBookmarkedComics([...bookmarkedComics, { code, id }]);
     } catch (err: any) {
       api.error({
         message: err.message,
@@ -161,8 +185,21 @@ const ComicsSearchPage = ({
     }
   };
 
-  const markOff = async (id: number) => {
+  const markOff = async (code: number) => {
     try {
+      const { id } = bookmarkedComics.find(
+        (bookmarkedComic) => bookmarkedComic.code === code
+      )!;
+
+      await axios.delete(`${baseURL}/comic/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setBookmarkedComics(
+        bookmarkedComics.filter((bookmarkedComic) => bookmarkedComic.id !== id)
+      );
     } catch (err: any) {
       api.error({
         message: err.message,
@@ -170,6 +207,11 @@ const ComicsSearchPage = ({
       });
     }
   };
+
+  const isComicBookmarked = (comic: ComicType) =>
+    bookmarkedComics.some(
+      (bookmarkedComic) => bookmarkedComic.code === comic.id
+    );
 
   return (
     <BaseLayout
@@ -199,7 +241,7 @@ const ComicsSearchPage = ({
                   width={150}
                   height={200}
                   id={comic.id}
-                  starred={markedComics.includes(comic.id)}
+                  starred={isComicBookmarked(comic)}
                   key={comic.id}
                   openModal={() => {}}
                   mark={mark}
