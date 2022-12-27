@@ -13,6 +13,7 @@ import Image from "next/image";
 import axios from "axios";
 import md5 from "blueimp-md5";
 import { isBookmarked, mark, markOff } from "../../../utils/bookmark";
+import MarvelCredentialsContext from "../../../contexts/MarvelCredentialsContext";
 
 type GetUserResponse = {
   name: string;
@@ -96,9 +97,15 @@ const ComicsSearchPage = ({
   const [api, contextHolder] = notification.useNotification();
   const [loading, setLoading] = useState(false);
   const { bookmarkedComics, setBookmarkedComics } = useContext(BookMarkContext);
+  const { setMarvelURL, setCredentials } = useContext(MarvelCredentialsContext);
 
   useEffect(() => {
     if (search) fetchComics(0);
+    setCredentials({
+      marvelPublicKey,
+      ts,
+      hash,
+    });
   }, [search]);
 
   useEffect(() => {
@@ -157,13 +164,29 @@ const ComicsSearchPage = ({
   };
 
   const markComic = (code: number) => {
-    mark('comic', code, baseURL, token, setBookmarkedComics, bookmarkedComics, api);
-  }
+    mark(
+      "comic",
+      code,
+      baseURL,
+      token,
+      setBookmarkedComics,
+      bookmarkedComics,
+      api
+    );
+  };
 
   const markOffComic = (code: number) => {
-    markOff('comic', code, baseURL, token, setBookmarkedComics, bookmarkedComics, api);
-  }
-  
+    markOff(
+      "comic",
+      code,
+      baseURL,
+      token,
+      setBookmarkedComics,
+      bookmarkedComics,
+      api
+    );
+  };
+
   return (
     <BaseLayout
       name={name}
@@ -187,6 +210,7 @@ const ComicsSearchPage = ({
             <BaseGrid>
               {comics.map((comic: ComicType) => (
                 <BaseCard
+                  type="comic"
                   title={comic.title}
                   imageUrl={getImageUrl(comic.images)}
                   width={150}

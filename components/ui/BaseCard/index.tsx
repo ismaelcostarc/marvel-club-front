@@ -2,20 +2,25 @@ import { Card, Button } from "antd";
 import { StarOutlined, StarFilled } from "@ant-design/icons";
 import style from "./style.module.css";
 import Image from "next/image";
+import { useState } from "react";
+import BaseModal from "../BaseModal";
+import CoverCard from "../CoverCard";
 
 type ComicCardType = {
+  type: "comic" | "character";
   title: string;
   imageUrl: string;
   starred: boolean;
   id: number;
-  width: number,
-  height: number,
+  width: number;
+  height: number;
   openModal: (id: number) => void;
   mark: (id: number) => void;
   markOff: (id: number) => void;
 };
 
 const ComicCard = ({
+  type,
   title,
   imageUrl,
   starred,
@@ -26,6 +31,10 @@ const ComicCard = ({
   mark,
   markOff,
 }: ComicCardType) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
   return (
     <Card
       className={style.card}
@@ -33,34 +42,30 @@ const ComicCard = ({
       actions={[
         starred ? (
           <Button key="bookmark" type="text" onClick={() => markOff(id)}>
-            <StarFilled style={{fontSize:"20px"}}/>
+            <StarFilled style={{ fontSize: "20px" }} />
           </Button>
         ) : (
           <Button key="bookmark" type="text" onClick={() => mark(id)}>
-            <StarOutlined style={{fontSize:"20px"}}/>
+            <StarOutlined style={{ fontSize: "20px" }} />
           </Button>
         ),
-        <Button key="description" type="text" onClick={() => openModal(id)} >
+        <Button
+          key="description"
+          type="text"
+          onClick={showModal}
+          disabled={type === "character"}
+        >
           About
         </Button>,
       ]}
     >
-      {imageUrl === '' ? (
-        <Image
-          alt="Comic Cover"
-          width={width}
-          height={height}
-          src="/assets/default-comic-cover.jpg"
-        />
-      ) : (
-        <Image
-          loader={() => imageUrl}
-          src={imageUrl}
-          alt="Comic Cover"
-          width={width}
-          height={height}
-        />
-      )}
+      <CoverCard imageUrl={imageUrl} width={width} height={height} />
+      <BaseModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        id={id}
+        cover={<CoverCard imageUrl={imageUrl} width={width} height={height} />}
+      />
     </Card>
   );
 };

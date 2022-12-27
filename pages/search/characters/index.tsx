@@ -94,7 +94,8 @@ const CharactersSearchPage = ({
   const [search, setSearch] = useState("");
   const [api, contextHolder] = notification.useNotification();
   const [loading, setLoading] = useState(false);
-  const { bookmarkedCharacters, setBookmarkedCharacters } = useContext(BookMarkContext);
+  const { bookmarkedCharacters, setBookmarkedCharacters } =
+    useContext(BookMarkContext);
 
   useEffect(() => {
     if (search) fetchCharacters(0);
@@ -116,10 +117,12 @@ const CharactersSearchPage = ({
           Authorization: `Bearer ${token}`,
         },
       });
-      const bookmarkedCharacters = data.map((bookmarkedCharacter: BookmarkType) => ({
-        id: bookmarkedCharacter.id,
-        code: +bookmarkedCharacter.code,
-      }));
+      const bookmarkedCharacters = data.map(
+        (bookmarkedCharacter: BookmarkType) => ({
+          id: bookmarkedCharacter.id,
+          code: +bookmarkedCharacter.code,
+        })
+      );
       setBookmarkedCharacters(bookmarkedCharacters);
     } catch (err: any) {
       api.error({
@@ -131,7 +134,7 @@ const CharactersSearchPage = ({
 
   const fetchCharacters = async (offset: number) => {
     try {
-      setLoading(true)
+      setLoading(true);
       const { data } = await axios.get(`${marvelURL}/characters`, {
         params: {
           ts,
@@ -145,9 +148,9 @@ const CharactersSearchPage = ({
       const results: CharacterType = data.data.results;
       setTotal(data.data.total);
       setCharacters(results as any);
-      setLoading(false)
+      setLoading(false);
     } catch (err: any) {
-      setLoading(false)
+      setLoading(false);
       api.error({
         message: err.message,
         placement: "topRight",
@@ -156,12 +159,28 @@ const CharactersSearchPage = ({
   };
 
   const markCharacter = (code: number) => {
-    mark('character', code, baseURL, token, setBookmarkedCharacters, bookmarkedCharacters, api);
-  }
+    mark(
+      "character",
+      code,
+      baseURL,
+      token,
+      setBookmarkedCharacters,
+      bookmarkedCharacters,
+      api
+    );
+  };
 
   const markOffCharacter = (code: number) => {
-    markOff('character', code, baseURL, token, setBookmarkedCharacters, bookmarkedCharacters, api);
-  }
+    markOff(
+      "character",
+      code,
+      baseURL,
+      token,
+      setBookmarkedCharacters,
+      bookmarkedCharacters,
+      api
+    );
+  };
 
   return (
     <BaseLayout
@@ -189,6 +208,7 @@ const CharactersSearchPage = ({
             <BaseGrid>
               {characters.map((character: CharacterType) => (
                 <BaseCard
+                  type="character"
                   title={character.name}
                   imageUrl={
                     character.thumbnail.path +

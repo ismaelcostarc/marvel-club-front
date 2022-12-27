@@ -1,6 +1,11 @@
 export type ComicType = {
   id: number;
   title: string;
+  dates: [
+    {
+      date: string;
+    }
+  ];
   images:
     | [
         {
@@ -9,6 +14,7 @@ export type ComicType = {
         }
       ]
     | [];
+    description: ''
 };
 
 export type CharacterType = {

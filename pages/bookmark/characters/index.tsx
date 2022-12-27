@@ -2,7 +2,12 @@
 import { Pagination, Row, Space, notification } from "antd";
 import { useEffect, useState, useContext } from "react";
 import { BookmarkType, CharacterType } from "../../../types";
-import { getBookmarksByPage, isBookmarked, mark, markOff } from "../../../utils/bookmark";
+import {
+  getBookmarksByPage,
+  isBookmarked,
+  mark,
+  markOff,
+} from "../../../utils/bookmark";
 import nookies, { destroyCookie } from "nookies";
 import BookMarkContext from "../../../contexts/BoomarkContext";
 import BaseCard from "../../../components/ui/BaseCard";
@@ -166,12 +171,28 @@ const BookmarkedCharactersPage = ({
   };
 
   const markCharacter = (code: number) => {
-    mark('character', code, baseURL, token, setBookmarkedCharacters, bookmarkedCharacters, api);
-  }
+    mark(
+      "character",
+      code,
+      baseURL,
+      token,
+      setBookmarkedCharacters,
+      bookmarkedCharacters,
+      api
+    );
+  };
 
   const markOffCharacter = (code: number) => {
-    markOff('character', code, baseURL, token, setBookmarkedCharacters, bookmarkedCharacters, api);
-  }
+    markOff(
+      "character",
+      code,
+      baseURL,
+      token,
+      setBookmarkedCharacters,
+      bookmarkedCharacters,
+      api
+    );
+  };
 
   return (
     <BaseLayout
@@ -189,6 +210,7 @@ const BookmarkedCharactersPage = ({
             <BaseGrid>
               {bookmarkedCharactersByPage.map((character: CharacterType) => (
                 <BaseCard
+                  type="character"
                   title={character.name}
                   imageUrl={
                     character.thumbnail.path +

@@ -2,7 +2,12 @@
 import { Pagination, Row, Space, notification } from "antd";
 import { useEffect, useState, useContext } from "react";
 import { BookmarkType, ComicType } from "../../../types";
-import { getBookmarksByPage, isBookmarked, mark, markOff } from "../../../utils/bookmark";
+import {
+  getBookmarksByPage,
+  isBookmarked,
+  mark,
+  markOff,
+} from "../../../utils/bookmark";
 import { getImageUrl } from "../../../utils/comics";
 import nookies, { destroyCookie } from "nookies";
 import BookMarkContext from "../../../contexts/BoomarkContext";
@@ -13,6 +18,7 @@ import BaseLayout from "../../../components/layout/BaseLayout";
 import Image from "next/image";
 import axios from "axios";
 import md5 from "blueimp-md5";
+import MarvelCredentialsContext from "../../../contexts/MarvelCredentialsContext";
 
 type GetUserResponse = {
   name: string;
@@ -91,16 +97,23 @@ const BookmarkedComicsPage = ({
   const [page, setPage] = useState(1);
   const [api, contextHolder] = notification.useNotification();
   const { bookmarkedComics, setBookmarkedComics } = useContext(BookMarkContext);
+  const { setMarvelURL, setCredentials } = useContext(MarvelCredentialsContext);
   const [bookmarkedComicsByPage, setBookmarkedComicsByPage] = useState<
     ComicType[]
   >([]);
 
   useEffect(() => {
     fetchBookmarkedComics();
+    setMarvelURL(marvelURL);
+    setCredentials({
+      marvelPublicKey,
+      ts,
+      hash,
+    });
   }, []);
 
   useEffect(() => {
-   fetchComics();
+    fetchComics();
   }, [bookmarkedComics]);
 
   useEffect(() => {
@@ -164,12 +177,28 @@ const BookmarkedComicsPage = ({
   };
 
   const markComic = (code: number) => {
-    mark('comic', code, baseURL, token, setBookmarkedComics, bookmarkedComics, api);
-  }
+    mark(
+      "comic",
+      code,
+      baseURL,
+      token,
+      setBookmarkedComics,
+      bookmarkedComics,
+      api
+    );
+  };
 
   const markOffComic = (code: number) => {
-    markOff('comic', code, baseURL, token, setBookmarkedComics, bookmarkedComics, api);
-  }
+    markOff(
+      "comic",
+      code,
+      baseURL,
+      token,
+      setBookmarkedComics,
+      bookmarkedComics,
+      api
+    );
+  };
 
   return (
     <BaseLayout
@@ -187,6 +216,7 @@ const BookmarkedComicsPage = ({
             <BaseGrid>
               {bookmarkedComicsByPage.map((comic: ComicType) => (
                 <BaseCard
+                  type="comic"
                   title={comic.title}
                   imageUrl={getImageUrl(comic.images)}
                   width={150}
