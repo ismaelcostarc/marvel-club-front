@@ -12,7 +12,7 @@ import BaseLayout from "../../../components/layout/BaseLayout";
 import Image from "next/image";
 import axios from "axios";
 import md5 from "blueimp-md5";
-import { isBookmarked, mark, markOff } from "../../../utils/search";
+import { isBookmarked, mark, markOff } from "../../../utils/bookmark";
 
 type GetUserResponse = {
   name: string;

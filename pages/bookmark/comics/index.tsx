@@ -2,7 +2,7 @@
 import { Pagination, Row, Space, notification } from "antd";
 import { useEffect, useState, useContext } from "react";
 import { BookmarkType, ComicType } from "../../../types";
-import { getBookmarksByPage } from "../../../utils/bookmark";
+import { getBookmarksByPage, isBookmarked, mark, markOff } from "../../../utils/bookmark";
 import { getImageUrl } from "../../../utils/comics";
 import nookies, { destroyCookie } from "nookies";
 import BookMarkContext from "../../../contexts/BoomarkContext";
@@ -100,7 +100,7 @@ const BookmarkedComicsPage = ({
   }, []);
 
   useEffect(() => {
-    if (bookmarkedComics.length !== 0) fetchComics();
+   fetchComics();
   }, [bookmarkedComics]);
 
   useEffect(() => {
@@ -163,54 +163,13 @@ const BookmarkedComicsPage = ({
     }
   };
 
-  const mark = async (code: number) => {
-    try {
-      const { data } = await axios.post(
-        `${baseURL}/comic`,
-        { code },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const { id } = data;
-      setBookmarkedComics([...bookmarkedComics, { code, id }]);
-    } catch (err: any) {
-      api.error({
-        message: err.message,
-        placement: "topRight",
-      });
-    }
-  };
+  const markComic = (code: number) => {
+    mark('comic', code, baseURL, token, setBookmarkedComics, bookmarkedComics, api);
+  }
 
-  const markOff = async (code: number) => {
-    try {
-      const { id } = bookmarkedComics.find(
-        (bookmarkedComic) => bookmarkedComic.code === code
-      )!;
-
-      await axios.delete(`${baseURL}/comic/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setBookmarkedComics(
-        bookmarkedComics.filter((bookmarkedComic) => bookmarkedComic.id !== id)
-      );
-    } catch (err: any) {
-      api.error({
-        message: err.message,
-        placement: "topRight",
-      });
-    }
-  };
-
-  const isComicBookmarked = (comic: ComicType) =>
-    bookmarkedComics.some(
-      (bookmarkedComic) => bookmarkedComic.code === comic.id
-    );
+  const markOffComic = (code: number) => {
+    markOff('comic', code, baseURL, token, setBookmarkedComics, bookmarkedComics, api);
+  }
 
   return (
     <BaseLayout
@@ -233,11 +192,11 @@ const BookmarkedComicsPage = ({
                   width={150}
                   height={200}
                   id={comic.id}
-                  starred={isComicBookmarked(comic)}
+                  starred={isBookmarked(comic, bookmarkedComics)}
                   key={comic.id}
                   openModal={() => {}}
-                  mark={mark}
-                  markOff={markOff}
+                  mark={markComic}
+                  markOff={markOffComic}
                 />
               ))}
             </BaseGrid>
