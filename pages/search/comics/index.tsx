@@ -1,13 +1,4 @@
-import {
-  Form,
-  Pagination,
-  Input,
-  Space,
-  Select,
-  Col,
-  Row,
-  Typography,
-} from "antd";
+import { Pagination, Input, Space, Row, notification } from "antd";
 import axios from "axios";
 import nookies, { destroyCookie } from "nookies";
 import { useEffect, useState } from "react";
@@ -16,14 +7,14 @@ import BaseHeader from "../../../components/ui/BaseHeader";
 import md5 from "blueimp-md5";
 import { ComicType } from "../../../types";
 import BaseGrid from "../../../components/ui/BaseGrid";
-import ComicCard from "../../../components/ui/ComicCard";
+import BaseCard from "../../../components/ui/BaseCard";
+import Image from "next/image";
 
 type GetUserResponse = {
   name: string;
 };
 
 const { Search } = Input;
-const { Text } = Typography;
 
 export async function getServerSideProps(context: any) {
   const cookies = nookies.get(context);
@@ -98,6 +89,7 @@ const ComicsSearchPage = ({
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
+  const [api, contextHolder] = notification.useNotification();
 
   useEffect(() => {
     fetchComics(0);
@@ -123,8 +115,21 @@ const ComicsSearchPage = ({
       const results: ComicType = data.data.results;
       setTotal(data.data.total);
       setComics(results as any);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      api.error({
+        message: err.message,
+        placement: "topRight",
+      });
+    }
+  };
+
+  type imagesType = [] | [{ path: string; extension: string }];
+  const getImageUrl = (images: imagesType): string => {
+    const image = images[0];
+    if (image) {
+      return `${image.path}.${image.extension}`;
+    } else {
+      return "";
     }
   };
 
@@ -135,6 +140,7 @@ const ComicsSearchPage = ({
       baseURL={baseURL}
       tokenName={tokenName}
     >
+      {contextHolder}
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
         <BaseHeader>Comics Search</BaseHeader>
         <Search
@@ -144,23 +150,40 @@ const ComicsSearchPage = ({
           size="large"
         />
 
-        <BaseGrid>
-          {comics.map((comic: ComicType) => (
-            <ComicCard
-              title={comic.title}
-              images={comic.images}
-              id={comic.id}
-              starred
-              key={comic.id}
+        {comics.length !== 0 ? (
+          <>
+            <BaseGrid>
+              {comics.map((comic: ComicType) => (
+                <BaseCard
+                  title={comic.title}
+                  imageUrl={getImageUrl(comic.images)}
+                  width={150}
+                  height={200}
+                  id={comic.id}
+                  starred
+                  key={comic.id}
+                  openModal={() => {}}
+                  mark={() => {}}
+                  markOff={() => {}}
+                />
+              ))}
+            </BaseGrid>
+            <Pagination
+              total={total}
+              onShowSizeChange={(_, size) => setPageSize(size)}
+              onChange={setPage}
             />
-          ))}
-        </BaseGrid>
-
-        <Pagination
-          total={total}
-          onShowSizeChange={(_, size) => setPageSize(size)}
-          onChange={setPage}
-        />
+          </>
+        ) : (
+          <Row justify={"center"} style={{ paddingTop: "10rem" }}>
+            <Image
+              src="/assets/thinking-bubble.png"
+              width="200"
+              height="200"
+              alt="Thinking bubble"
+            />
+          </Row>
+        )}
       </Space>
     </BaseLayout>
   );

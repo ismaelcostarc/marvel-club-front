@@ -7,7 +7,7 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 import style from "./style.module.css";
-import UserCard from "../../ui/UserCard";
+import UserCard from "../UserCard";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
