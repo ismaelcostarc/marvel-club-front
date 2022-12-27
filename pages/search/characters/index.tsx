@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Pagination, Input, Space, Row, notification } from "antd";
 import axios from "axios";
 import nookies, { destroyCookie } from "nookies";
@@ -97,7 +98,7 @@ const CharactersSearchPage = ({
 
   useEffect(() => {
     const offset = pageSize * (page - 1);
-    fetchCharacters(offset);
+    if (search) fetchCharacters(offset);
   }, [page, pageSize]);
 
   const fetchCharacters = async (offset: number) => {

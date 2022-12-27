@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Pagination, Input, Space, Row, notification } from "antd";
 import axios from "axios";
 import nookies, { destroyCookie } from "nookies";
@@ -84,20 +85,21 @@ const ComicsSearchPage = ({
   ts,
   hash,
 }: any): JSX.Element => {
-  const [comics, setComics] = useState<[ComicType] | []>([]);
+  const [comics, setComics] = useState<ComicType[] | []>([]);
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [api, contextHolder] = notification.useNotification();
+  const [markedComics, setMarkedComics] = useState<number[]>([]);
 
   useEffect(() => {
-    fetchComics(0);
+    if (search) fetchComics(0);
   }, [search]);
 
   useEffect(() => {
     const offset = pageSize * (page - 1);
-    fetchComics(offset);
+    if (search) fetchComics(offset);
   }, [page, pageSize]);
 
   const fetchComics = async (offset: number) => {
@@ -133,6 +135,40 @@ const ComicsSearchPage = ({
     }
   };
 
+  const mark = async (id: number) => {
+    try {
+      await axios.post(
+        `${baseURL}/comic`,
+        {
+          code: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setMarkedComics([...markedComics, id]);
+    } catch (err: any) {
+      api.error({
+        message: err.message,
+        placement: "topRight",
+      });
+    }
+  };
+
+  const markOff = async (id: number) => {
+    try {
+
+    } catch (err: any) {
+      api.error({
+        message: err.message,
+        placement: "topRight",
+      });
+    }
+  };
+  
+
   return (
     <BaseLayout
       name={name}
@@ -160,11 +196,11 @@ const ComicsSearchPage = ({
                   width={150}
                   height={200}
                   id={comic.id}
-                  starred
+                  starred={markedComics.includes(comic.id)}
                   key={comic.id}
                   openModal={() => {}}
-                  mark={() => {}}
-                  markOff={() => {}}
+                  mark={mark}
+                  markOff={markOff}
                 />
               ))}
             </BaseGrid>
